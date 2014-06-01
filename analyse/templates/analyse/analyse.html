@@ -1,0 +1,27 @@
+{% extends "common/base.html" %}
+{% load staticfiles %}
+
+{% block customHeader %}
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+{% endblock %}
+
+{% block content %}
+<div class='row' style="margin-top:20px;">
+	<div class="col-md-2">
+		<ul class="nav nav-pills nav-stacked">
+			<li {% if cat == 'gen' %}class="active"{%endif%}><a href="{% url 'general' %}">General</a></li>
+			<li {% if cat == 'wifi' %}class="active"{%endif%}><a href="{% url 'wifi' %}">Wifi</a></li>
+			<li {% if cat == 'controller' %}class="active"{%endif%}><a href="{% url 'controller'%}">Controller</a></li>
+			<li {% if cat == 'dhcp' %}class="active"{%endif%}><a href="{% url 'dhcp'%}">DHCP</a></li>
+			<li {% if cat == 'radius' %}class="active"{%endif%}><a href="{% url 'radius'%}">Radius</a></li>
+		</ul>
+	</div>
+
+	<div id="categorie" class="col-md-10">
+	{% block category %}
+
+	{%endblock%}
+	</div>
+</div>
+
+{% endblock %}

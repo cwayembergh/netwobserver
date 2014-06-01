@@ -1,0 +1,37 @@
+{% extends "analyse/analyse.html" %}
+{% load staticfiles %}
+
+{%block category%}
+
+<script type="text/javascript">
+	// Load the Visualization API and the piechart package.
+	google.load('visualization', '1.0', {'packages':['corechart']});
+
+	// Set a callback to run when the Google Visualization API is loaded.
+	google.setOnLoadCallback(drawRateLogs);
+
+	function drawRateLogs() {
+
+		var data = new google.visualization.DataTable();
+		data.addColumn('string', 'Category');
+		data.addColumn('number', 'Quantity');
+		data.addRows([
+			{%if successRate%}
+			['Success', {{successRate.Success}}],
+			['Fail', {{successRate.Failed}}]
+			{%endif%}
+			]);		
+		var options = {'title':'Authentication Success Rate',
+			'width':900,
+			'height':500,
+			slices: [{color: 'green'},{color: 'red'}]
+		};
+
+		var chart = new google.visualization.PieChart(document.getElementById('successrate_div'));
+
+		chart.draw(data, options);
+	}
+</script>
+<div id="successrate_div" style="width:400; height:300"></div>
+
+{%endblock%}

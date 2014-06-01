@@ -1,0 +1,99 @@
+{% extends "analyse/wifi.html" %}
+{% load staticfiles %}
+{% load tz %}
+
+{% localtime on %}
+{% block section %}
+<div class="container" style='margin-top: 25px;'>
+<form method="get"  action="{% url 'wifiAP' %}" class="form-horizontal" role="form">
+	<div class="form-group">
+		<label for="selectedAP" class="col-md-2 control-label">Access Point</label>
+		<div class="col-md-6">			
+			<select class="form-control" name="selectedAP" id="selectedAP">
+				<option value="" selected></option>
+				{% if allAP %}
+				{% for ap in allAP %}
+				<option value="{{ap.id}}">{{ap.name}}</option>
+				{% endfor %}
+				{% endif %}
+			</select>
+		</div>
+		<button type="submit" class="btn btn-default">
+			<span class="glyphicon glyphicon-signal"></span> Get
+		</button>
+	</div>
+</form>
+</div>
+{%if apData%}
+<script type="text/javascript">
+	google.load('visualization', '1.0', {'packages':['corechart']});
+	google.setOnLoadCallback(drawBandwidthChart);
+
+	function drawBandwidthChart() {
+		
+		var data = google.visualization.arrayToDataTable([
+		  ['Time', 'Rx Speed', 'Tx Speed'],
+		  {%for log in apData%}
+		  [new Date({{log.date.year}},{{log.date.month}}-1,{{log.date.day}},{{log.date.hour}},{{log.date.minute}},{{log.date.second}}), {{log.data.ethernetRxTotalBytes}}, {{log.data.ethernetTxTotalBytes}}],
+		  {%endfor%}
+		]);
+
+		var options = {
+		  title: 'Access Point Bandwidth (Mb/s)',
+		  curveType : 'function',
+		};
+
+		var chart = new google.visualization.LineChart(document.getElementById('bandwidthchart_div'));
+		chart.draw(data, options);
+	}
+
+	{%for i in interfaceData%}
+	google.setOnLoadCallback(drawInterface{{forloop.counter0}}Chart);
+	function drawInterface{{forloop.counter0}}Chart() {
+		
+		var data = google.visualization.arrayToDataTable([
+		  ['Time', 'Clients', 'Clients with Poor SNR', 'Channel Utilization'],
+		  {%for log in i.data%}
+		  [new Date({{log.date.year}},{{log.date.month}}-1,{{log.date.day}},{{log.date.hour}},{{log.date.minute}},{{log.date.second}}), {{log.data.numOfClients}}, {{log.data.numOfPoorSNRClients}} , {{log.data.channelUtilization}}/100],
+		  {%endfor%}
+		]);
+
+		var options = {
+			series: {2:{targetAxisIndex:1, format:'#,##%', curveType:'function'}},
+			vAxes:[
+				{}, 
+				{title:'Channel Utilization',format: '#%'}
+			],
+			title: 'Occupancy',
+		};
+
+		var chart = new google.visualization.LineChart(document.getElementById('interface{{forloop.counter0}}chart_div'));
+		chart.draw(data, options);
+	}
+
+	{%endfor%}
+
+</script>
+
+<h3>{{ap.name}}</h3>
+<dl class="dl-horizontal">
+	<dt>IP Address</dt>
+	<dd>{{ap.ip}}</dd>	
+	<dt>Mac Address</dt>
+	<dd>{{ap.macAddress}}</dd>
+	<dt>Ethernet Link</dt>
+	<dd>{{ap.ethernetLinkSpeed}} Mb/s</dd>
+</dl>
+<div id="bandwidthchart_div" style="width: 900px; height: 500px;"></div>
+
+
+
+{%for i in interfaceData%}
+<h4>Interface {{i.interface.get_ifType_display}}</h4>
+<div id="interface{{forloop.counter0}}chart_div" style="width: 900px; height: 500px;"></div>
+{%endfor%}
+
+
+{%endif%}
+{%endblock%}
+{% endlocaltime %}

@@ -1,0 +1,47 @@
+{% extends "analyse/dhcp.html" %}
+{% load staticfiles %}
+
+{% block section %}
+<div class="container">
+
+	{%if active == True%}
+	<div class="alert alert-success">DHCP is up and running</div>
+	{%else%}
+	<div class="alert alert-warning">No DHCP activity detected</div>
+	{%endif%}
+
+	{%if leaseAlerts%}
+	<div class="panel panel-info">
+		<div class="panel-heading">Scattering of the lease alerts</div>
+		<div class="panel-body">
+			<dl class="dl-horizontal">
+				<dt>Number of alerts</dt>
+				<dd>{{leaseAlerts.alerts}}</dd>
+				<dt>Affected devices</dt>
+				<dd>{{leaseAlerts.devices}}</dd>
+				<dt>Scatter-degree</dt>
+				<dd>{{leaseAlerts.ratio|floatformat:-2}}</dd>
+			</dl>
+		</div>
+	</div>
+	{%endif%}
+
+	{%if wronglyPlugged%}
+	<div class="panel panel-warning">
+		<div class="panel-heading">The following devices may be connected on a wrong plug</div>
+		<div class="panel-body">
+		{%for dev, infos in wronglyPlugged.items %}
+		<h5>{{dev}}</h5>
+		<dl class="dl-horizontal">
+			<dt>Plugged on</dt>
+			<dd>{{infos.via}}</dd>
+			<dt>Last seen</dt>
+			<dd>{{infos.date}}</dd>
+		</dl>
+		{%endfor%}
+		</div>
+	</div>
+	{%endif%}
+
+</div>
+{%endblock%}
